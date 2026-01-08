@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Map_MainWindow</class>
+ <widget class="QMainWindow" name="Map_MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1080</width>
+    <height>620</height>
+   </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>1080</width>
+    <height>620</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>1080</width>
+    <height>620</height>
+   </size>
+  </property>
+  <property name="windowTitle">
+   <string>运行图</string>
+  </property>
+  <widget class="QWidget" name="centralwidget"/>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1080</width>
+     <height>33</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menu_edit">
+    <property name="title">
+     <string>编辑</string>
+    </property>
+   </widget>
+   <widget class="QMenu" name="menu_undo">
+    <property name="title">
+     <string>撤销</string>
+    </property>
+   </widget>
+   <widget class="QMenu" name="menu_redo">
+    <property name="title">
+     <string>重做</string>
+    </property>
+   </widget>
+   <widget class="QMenu" name="menu_save">
+    <property name="title">
+     <string>保存</string>
+    </property>
+   </widget>
+   <widget class="QMenu" name="menu_new">
+    <property name="title">
+     <string>新建</string>
+    </property>
+   </widget>
+   <widget class="QMenu" name="menu_import">
+    <property name="title">
+     <string>导入</string>
+    </property>
+   </widget>
+   <addaction name="menu_new"/>
+   <addaction name="menu_import"/>
+   <addaction name="menu_edit"/>
+   <addaction name="menu_undo"/>
+   <addaction name="menu_redo"/>
+   <addaction name="menu_save"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

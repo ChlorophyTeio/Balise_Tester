@@ -1,0 +1,12 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Update CSV",
+			"type": "shell",
+			"command": "python d:\\Projects\\Python\\Balise_Tester\\update_map_csv.py",
+			"isBackground": false,
+			"group": "build"
+		}
+	]
+}
