@@ -4,10 +4,11 @@ import copy
 import csv
 import datetime
 import os
+import sys
 from typing import Dict, List, Optional
 
 from PySide6.QtCore import QPoint, QPointF, QRect, QSettings, Qt, QTimer, Signal
-from PySide6.QtGui import (QColor, QCursor, QFont, QPainter, QPen, QPixmap,
+from PySide6.QtGui import (QColor, QFont, QPainter, QPen, QPixmap,
                            QPolygonF)
 from PySide6.QtWidgets import QToolTip, QWidget
 
@@ -43,10 +44,14 @@ class SimulationWidget(QWidget):
         self.offset_y = 300
 
         # Path resolution
-        current_dir = os.path.dirname(os.path.abspath(__file__))
-        # current_dir is .../balise_tester/widgets
-        # Up 2 levels -> .../Balise_Tester
-        self.project_root = os.path.dirname(os.path.dirname(current_dir))
+        if getattr(sys, 'frozen', False):
+            # Running in a bundle
+            self.project_root = sys._MEIPASS
+        else:
+            current_dir = os.path.dirname(os.path.abspath(__file__))
+            # current_dir is .../balise_tester/widgets
+            # Up 2 levels -> .../Balise_Tester
+            self.project_root = os.path.dirname(os.path.dirname(current_dir))
 
         asset_dir = os.path.join(self.project_root, "assets", "img")
         self.balise_n_img = QPixmap(os.path.join(asset_dir, "balise_n.png"))

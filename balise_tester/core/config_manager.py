@@ -3,6 +3,7 @@
 import csv
 import json
 import os
+import sys
 from typing import Dict, List, Optional
 
 
@@ -20,10 +21,14 @@ class ConfigManager:
                         Defaults to data/config in project root.
         """
         if config_dir is None:
-            # Use absolute path relative to this file
-            # .../balise_tester/core/config_manager.py -> .../
-            current_dir = os.path.dirname(os.path.abspath(__file__))
-            project_root = os.path.dirname(os.path.dirname(current_dir))
+            if getattr(sys, 'frozen', False):
+                # Running in a bundle
+                project_root = sys._MEIPASS
+            else:
+                # Use absolute path relative to this file
+                # .../balise_tester/core/config_manager.py -> .../
+                current_dir = os.path.dirname(os.path.abspath(__file__))
+                project_root = os.path.dirname(os.path.dirname(current_dir))
             self.config_dir = os.path.join(project_root, "data", "config")
         else:
             self.config_dir = config_dir
