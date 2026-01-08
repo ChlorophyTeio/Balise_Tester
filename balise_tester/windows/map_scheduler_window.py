@@ -1,6 +1,5 @@
 """Window for editing train schedules."""
 
-import copy
 import csv
 import datetime
 import os
@@ -8,8 +7,7 @@ from typing import Optional
 
 from PySide6.QtCore import QSettings, Qt
 from PySide6.QtGui import QAction, QColor, QBrush, QKeySequence
-from PySide6.QtWidgets import (QFileDialog, QHeaderView, QInputDialog,
-                               QMainWindow, QMenu, QMessageBox, QTableWidget,
+from PySide6.QtWidgets import (QFileDialog, QHeaderView, QMainWindow, QMessageBox, QTableWidget,
                                QTableWidgetItem, QVBoxLayout, QWidget)
 
 from ui.map import Ui_Map_MainWindow
@@ -27,25 +25,25 @@ class MapSchedulerWindow(QMainWindow, Ui_Map_MainWindow):
         """Initialize the map scheduler window."""
         super().__init__(parent)
         self.setupUi(self)
-        
+
         # Initialize Data Table
         self.init_table()
-        
+
         # Undo/Redo Stacks
         self.undo_stack = []
         self.redo_stack = []
         self.max_history = 50
-        
+
         # Current File
         self.current_file_path = None
-        
+
         # Connect Menus
         self.init_menus()
-        
+
         # Connect to Simulation Time if parent has it
         if parent and hasattr(parent, 'simulation_widget'):
             parent.simulation_widget.sim_time_updated.connect(self.update_highlight)
-        
+
         # Initial State
         self.save_state_to_history()
 
@@ -57,17 +55,17 @@ class MapSchedulerWindow(QMainWindow, Ui_Map_MainWindow):
         self.layout = QVBoxLayout(self.centralwidget)
         self.table_widget = QTableWidget()
         self.layout.addWidget(self.table_widget)
-        
+
         # Columns: "列车、起始站、到起始站时间、发车时间、到达站、出到达站时间、到达时间"
         self.headers = ["列车", "起始站", "到起始站时间", "发车时间", "到达站", "出到达站时间", "到达时间"]
         self.table_widget.setColumnCount(len(self.headers))
         self.table_widget.setHorizontalHeaderLabels(self.headers)
         self.table_widget.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
-        
+
         # Connect change signal for undo/redo (debouncing might be needed for text changes, 
         # but for cell changed it's okay)
         self.table_widget.itemChanged.connect(self.on_item_changed)
-        
+
         # Track programmatic changes to avoid loop
         self.is_programmatic_change = False
 
@@ -81,43 +79,43 @@ class MapSchedulerWindow(QMainWindow, Ui_Map_MainWindow):
         self.action_new = QAction("新建", self)
         self.action_new.setShortcut(QKeySequence.New)
         self.action_new.triggered.connect(self.new_file)
-        self.menu_new.addAction(self.action_new) # Assuming menu_new is QMenu
-        
+        self.menu_new.addAction(self.action_new)  # Assuming menu_new is QMenu
+
         # --- File / Import (Open) ---
         self.action_import = QAction("导入...", self)
         self.action_import.setShortcut(QKeySequence.Open)
         self.action_import.triggered.connect(self.import_file)
         self.menu_import.addAction(self.action_import)
-        
+
         # --- File / Save ---
         self.action_save = QAction("保存", self)
         self.action_save.setShortcut(QKeySequence.Save)
         self.action_save.triggered.connect(self.save_file)
-        
+
         self.action_save_as = QAction("另存为...", self)
         self.action_save_as.setShortcut(QKeySequence.SaveAs)
         self.action_save_as.triggered.connect(self.save_as_file)
-        
+
         self.menu_save.addAction(self.action_save)
         self.menu_save.addAction(self.action_save_as)
-        
+
         # --- Edit ---
         # "Edit" menu usually contains operations.
         self.action_add_row = QAction("添加行", self)
         self.action_add_row.triggered.connect(self.add_row)
         self.menu_edit.addAction(self.action_add_row)
-        
+
         self.action_del_row = QAction("删除行", self)
         self.action_del_row.setShortcut(QKeySequence.Delete)
         self.action_del_row.triggered.connect(self.delete_row)
         self.menu_edit.addAction(self.action_del_row)
-        
+
         # --- Undo / Redo ---
         self.action_undo = QAction("撤销", self)
         self.action_undo.setShortcut(QKeySequence.Undo)
         self.action_undo.triggered.connect(self.undo)
         self.menu_undo.addAction(self.action_undo)
-        
+
         self.action_redo = QAction("重做", self)
         self.action_redo.setShortcut(QKeySequence.Redo)
         self.action_redo.triggered.connect(self.redo)
@@ -135,11 +133,11 @@ class MapSchedulerWindow(QMainWindow, Ui_Map_MainWindow):
         self.menu_edit.addAction(self.action_preview)
 
     # --- Logic ---
-    
+
     def show_preview(self):
         """显示运行图预览"""
         data = self.get_table_data()
-        
+
         # We need stations list. Try to get from parent main window
         stations = []
         line_length = 100.0
@@ -148,7 +146,7 @@ class MapSchedulerWindow(QMainWindow, Ui_Map_MainWindow):
             stations = parent.stations
         if parent and hasattr(parent, 'get_max_length'):
             line_length = parent.get_max_length()
-            
+
         dialog = MapPreviewDialog(self, schedule_data=data, stations=stations, line_length=line_length)
         dialog.exec()
 
@@ -180,9 +178,9 @@ class MapSchedulerWindow(QMainWindow, Ui_Map_MainWindow):
         """Save current state to undo stack"""
         if self.is_programmatic_change:
             return
-            
+
         current_state = self.get_table_data()
-        
+
         # Avoid duplicate states if nothing changed (optional)
         if self.undo_stack and self.undo_stack[-1] == current_state:
             return
@@ -190,7 +188,7 @@ class MapSchedulerWindow(QMainWindow, Ui_Map_MainWindow):
         self.undo_stack.append(current_state)
         if len(self.undo_stack) > self.max_history:
             self.undo_stack.pop(0)
-            
+
         # Clear redo stack on new change
         self.redo_stack.clear()
 
@@ -217,9 +215,9 @@ class MapSchedulerWindow(QMainWindow, Ui_Map_MainWindow):
         """读取CSV并填充表格"""
         with open(path, 'r', encoding='utf-8-sig') as f:
             reader = csv.reader(f)
-            header = next(reader, None) # Skip header
+            header = next(reader, None)  # Skip header
             data = list(reader)
-            
+
         self.set_table_data(data)
         self.current_file_path = path
         self.save_state_to_history()
@@ -236,11 +234,11 @@ class MapSchedulerWindow(QMainWindow, Ui_Map_MainWindow):
 
     def new_file(self):
         if self.table_widget.rowCount() > 0:
-            res = QMessageBox.question(self, "确认", "新建将清空当前表格，是否继续？", 
+            res = QMessageBox.question(self, "确认", "新建将清空当前表格，是否继续？",
                                        QMessageBox.Yes | QMessageBox.No)
             if res != QMessageBox.Yes:
                 return
-        
+
         self.is_programmatic_change = True
         self.table_widget.setRowCount(0)
         self.current_file_path = None
@@ -251,11 +249,11 @@ class MapSchedulerWindow(QMainWindow, Ui_Map_MainWindow):
         default_dir = self._get_map_data_dir()
         if not os.path.exists(default_dir):
             os.makedirs(default_dir)
-            
+
         path, _ = QFileDialog.getOpenFileName(self, "导入CSV", default_dir, "CSV Files (*.csv);;All Files (*)")
         if not path:
             return
-            
+
         try:
             self.load_csv(path)
         except Exception as e:
@@ -271,7 +269,7 @@ class MapSchedulerWindow(QMainWindow, Ui_Map_MainWindow):
         default_dir = self._get_map_data_dir()
         if not os.path.exists(default_dir):
             os.makedirs(default_dir)
-            
+
         path, _ = QFileDialog.getSaveFileName(self, "保存CSV", default_dir, "CSV Files (*.csv)")
         if path:
             self._write_csv(path)
@@ -301,13 +299,13 @@ class MapSchedulerWindow(QMainWindow, Ui_Map_MainWindow):
         selected_rows = set()
         for idx in self.table_widget.selectedIndexes():
             selected_rows.add(idx.row())
-            
+
         # Fallback to current row if no selection but there is a current item
         if not selected_rows:
             curr = self.table_widget.currentRow()
             if curr >= 0:
                 selected_rows.add(curr)
-                
+
         if not selected_rows:
             return
 
@@ -321,11 +319,11 @@ class MapSchedulerWindow(QMainWindow, Ui_Map_MainWindow):
     def undo(self):
         if len(self.undo_stack) <= 1:
             return
-            
+
         # Current state is top of undo stack
         current = self.undo_stack.pop()
         self.redo_stack.append(current)
-        
+
         # Previous state
         prev = self.undo_stack[-1]
         self.set_table_data(prev)
@@ -333,20 +331,20 @@ class MapSchedulerWindow(QMainWindow, Ui_Map_MainWindow):
     def redo(self):
         if not self.redo_stack:
             return
-            
+
         next_state = self.redo_stack.pop()
         self.undo_stack.append(next_state)
         self.set_table_data(next_state)
 
     def _parse_time(self, time_str):
-        if not time_str or not isinstance(time_str, str): 
+        if not time_str or not isinstance(time_str, str):
             return None
         time_str = time_str.strip()
         if not time_str: return None
-        
+
         # Use simple today date
         today = datetime.date.today()
-        
+
         for fmt in ["%H:%M:%S", "%H:%M"]:
             try:
                 t = datetime.datetime.strptime(time_str, fmt).time()
@@ -375,33 +373,33 @@ class MapSchedulerWindow(QMainWindow, Ui_Map_MainWindow):
         """Highlight current train (Green) and next train (Yellow)."""
         if not current_dt or self.table_widget.rowCount() == 0:
             return
-            
+
         # Current time normalized to today for comparison (ignoring date shift for daily schedule)
         now_time = current_dt.time()
         now = datetime.datetime.combine(datetime.date.today(), now_time)
-        
+
         rows = self.table_widget.rowCount()
         next_train_row = -1
         min_diff = float('inf')
         current_row = -1
-        
+
         # Color constants
-        COLOR_CURRENT = QColor("#90EE90") # Light Green
-        COLOR_NEXT = QColor("#FFFFE0")    # Light Yellow
+        COLOR_CURRENT = QColor("#90EE90")  # Light Green
+        COLOR_NEXT = QColor("#FFFFE0")  # Light Yellow
 
         # Single pass: determine current and next rows without painting
         for r in range(rows):
             item_dep = self.table_widget.item(r, 3)
             item_arr = self.table_widget.item(r, 6)
-            
+
             t_dep = self._parse_time(item_dep.text()) if item_dep else None
             t_arr = self._parse_time(item_arr.text()) if item_arr else None
-            
+
             if not (t_dep and t_arr):
                 continue
 
             actual_arr = t_arr + datetime.timedelta(days=1) if t_arr < t_dep else t_arr
-            
+
             if current_row == -1 and t_dep <= now <= actual_arr:
                 current_row = r
                 # Do not break; we still want to find the next upcoming train

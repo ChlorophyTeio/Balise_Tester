@@ -1,5 +1,7 @@
 from PySide6.QtWidgets import QDialog
+
 from ui.train_config import Ui_train_config_form as Ui_TrainConfigForm
+
 
 class TrainConfigDialog(QDialog, Ui_TrainConfigForm):
     """
@@ -7,6 +9,7 @@ class TrainConfigDialog(QDialog, Ui_TrainConfigForm):
     
     用于创建或编辑列车的配置信息，包括名称、运行图设置、起止车站、初始速度等。
     """
+
     def __init__(self, parent=None, config_data=None, stations=None):
         """
         初始化列车配置对话框。
@@ -34,19 +37,19 @@ class TrainConfigDialog(QDialog, Ui_TrainConfigForm):
         self.comboBox_setdelay.setCurrentIndex(int(self.config_data.get("start_mode", 0)))
         self.lineEdit_speed.setText(str(self.config_data.get("initial_speed", "0")))
         self.comboBox_opt.setCurrentIndex(int(self.config_data.get("end_action", 0)))
-        
+
         # Populate start and end station comboboxes
         self.comboBox_set_start.clear()
         self.comboBox_set_end.clear()
-        
+
         for station in self.stations:
             name = station.get("name", "Unknown Station")
             self.comboBox_set_start.addItem(name)
             self.comboBox_set_end.addItem(name)
-            
+
         self.comboBox_set_start.addItem("根据运行图运行")
         self.comboBox_set_end.addItem("根据运行图运行")
-        
+
         # Set current index for start station
         saved_start = self.config_data.get("start_station", "根据运行图运行")
         index_start = self.comboBox_set_start.findText(str(saved_start))
@@ -73,11 +76,11 @@ class TrainConfigDialog(QDialog, Ui_TrainConfigForm):
         self.config_data["start_station"] = self.comboBox_set_start.currentText()
         self.config_data["end_station"] = self.comboBox_set_end.currentText()
         self.config_data["end_action"] = self.comboBox_opt.currentIndex()
-        
+
         try:
             speed = float(self.lineEdit_speed.text())
             self.config_data["initial_speed"] = speed
         except ValueError:
             self.config_data["initial_speed"] = 0.0
-            
+
         self.accept()

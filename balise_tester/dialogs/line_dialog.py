@@ -1,5 +1,7 @@
 from PySide6.QtWidgets import QDialog, QMessageBox
+
 from ui.line_config import Ui_train_config_form as Ui_LineConfigForm
+
 
 class LineConfigDialog(QDialog, Ui_LineConfigForm):
     """
@@ -7,6 +9,7 @@ class LineConfigDialog(QDialog, Ui_LineConfigForm):
     
     用于设置线路的总长度等全局参数。
     """
+
     def __init__(self, parent=None, config_data=None):
         """
         初始化线路配置对话框。
@@ -37,11 +40,11 @@ class LineConfigDialog(QDialog, Ui_LineConfigForm):
         try:
             length = float(self.lineEdit_line_total_length.text())
             speed = float(self.lineEdit_line_total_speed.text())
-            
+
             if length <= 0 or speed <= 0:
                 QMessageBox.warning(self, "警告", "线路长度和最大速度必须大于0")
                 return
-                
+
             self.config_data["total_length"] = length
             self.config_data["max_speed"] = speed
             self.accept()

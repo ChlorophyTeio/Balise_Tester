@@ -8,15 +8,12 @@
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
 
-from PySide6.QtCore import (QCoreApplication, QDate, QDateTime, QLocale,
-    QMetaObject, QObject, QPoint, QRect,
-    QSize, QTime, QUrl, Qt)
-from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
-    QFont, QFontDatabase, QGradient, QIcon,
-    QImage, QKeySequence, QLinearGradient, QPainter,
-    QPalette, QPixmap, QRadialGradient, QTransform)
-from PySide6.QtWidgets import (QApplication, QFrame, QHBoxLayout, QLabel,
-    QLineEdit, QPushButton, QSizePolicy, QWidget)
+from PySide6.QtCore import (QCoreApplication, QMetaObject, QRect,
+                            QSize, Qt)
+from PySide6.QtGui import (QFont)
+from PySide6.QtWidgets import (QFrame, QHBoxLayout, QLabel,
+                               QLineEdit, QPushButton, QWidget)
+
 
 class Ui_train_config_form(object):
     def setupUi(self, train_config_form):
@@ -92,18 +89,21 @@ class Ui_train_config_form(object):
         self.retranslateUi(train_config_form)
 
         QMetaObject.connectSlotsByName(train_config_form)
+
     # setupUi
 
     def retranslateUi(self, train_config_form):
-        train_config_form.setWindowTitle(QCoreApplication.translate("train_config_form", u"\u7ebf\u8def\u914d\u7f6e\u7a97\u53e3", None))
-#if QT_CONFIG(accessibility)
+        train_config_form.setWindowTitle(
+            QCoreApplication.translate("train_config_form", u"\u7ebf\u8def\u914d\u7f6e\u7a97\u53e3", None))
+        # if QT_CONFIG(accessibility)
         train_config_form.setAccessibleName("")
-#endif // QT_CONFIG(accessibility)
-        self.station_name_label.setText(QCoreApplication.translate("train_config_form", u"\u7ebf\u8def\u914d\u7f6e", None))
+        # endif // QT_CONFIG(accessibility)
+        self.station_name_label.setText(
+            QCoreApplication.translate("train_config_form", u"\u7ebf\u8def\u914d\u7f6e", None))
         self.pushButton_save.setText(QCoreApplication.translate("train_config_form", u"\u4fdd\u5b58", None))
         self.pushButton_del.setText(QCoreApplication.translate("train_config_form", u"\u5220\u9664", None))
         self.pushButton_cancel.setText(QCoreApplication.translate("train_config_form", u"\u53d6\u6d88", None))
         self.label_2.setText(QCoreApplication.translate("train_config_form", u"\u603b\u957f\u5ea6\uff08km\uff09", None))
-        self.label_3.setText(QCoreApplication.translate("train_config_form", u"\u7ebf\u8def\u901f\u5ea6\uff08km/h\uff09", None))
+        self.label_3.setText(
+            QCoreApplication.translate("train_config_form", u"\u7ebf\u8def\u901f\u5ea6\uff08km/h\uff09", None))
     # retranslateUi
-

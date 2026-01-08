@@ -2,7 +2,6 @@
 
 import csv
 import os
-import sys
 from functools import partial
 
 from PySide6.QtCore import QFileSystemWatcher, Qt, QSettings
@@ -10,16 +9,15 @@ from PySide6.QtGui import QAction
 from PySide6.QtWidgets import QMainWindow, QMenu
 
 from ui.main import Ui_MainWindow
-from ui.about import Ui_aboutForm
 from .core.config_manager import ConfigManager
 from .dialogs.balise_dialog import BaliseConfigDialog
+from .dialogs.line_dialog import LineConfigDialog
 from .dialogs.station_dialog import StationConfigDialog
 from .dialogs.train_dialog import TrainConfigDialog
-from .dialogs.line_dialog import LineConfigDialog
-from .windows.map_scheduler_window import MapSchedulerWindow
-from .windows.map_preview_dialog import MapPreviewDialog
-from .windows.about_window import AboutWindow
 from .widgets.simulation_widget import SimulationWidget
+from .windows.about_window import AboutWindow
+from .windows.map_preview_dialog import MapPreviewDialog
+from .windows.map_scheduler_window import MapSchedulerWindow
 
 
 class MainWindow(QMainWindow, Ui_MainWindow):

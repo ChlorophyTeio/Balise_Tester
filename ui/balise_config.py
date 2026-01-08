@@ -8,16 +8,12 @@
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
 
-from PySide6.QtCore import (QCoreApplication, QDate, QDateTime, QLocale,
-    QMetaObject, QObject, QPoint, QRect,
-    QSize, QTime, QUrl, Qt)
-from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
-    QFont, QFontDatabase, QGradient, QIcon,
-    QImage, QKeySequence, QLinearGradient, QPainter,
-    QPalette, QPixmap, QRadialGradient, QTransform)
-from PySide6.QtWidgets import (QApplication, QComboBox, QFrame, QHBoxLayout,
-    QLabel, QLineEdit, QPushButton, QSizePolicy,
-    QTextEdit, QWidget)
+from PySide6.QtCore import (QCoreApplication, QMetaObject, QRect,
+                            QSize, Qt)
+from PySide6.QtGui import (QFont)
+from PySide6.QtWidgets import (QComboBox, QFrame, QHBoxLayout,
+                               QLabel, QLineEdit, QPushButton, QTextEdit, QWidget)
+
 
 class Ui_balise_config_form(object):
     def setupUi(self, balise_config_form):
@@ -143,34 +139,42 @@ class Ui_balise_config_form(object):
         self.retranslateUi(balise_config_form)
 
         QMetaObject.connectSlotsByName(balise_config_form)
+
     # setupUi
 
     def retranslateUi(self, balise_config_form):
-        balise_config_form.setWindowTitle(QCoreApplication.translate("balise_config_form", u"\u5e94\u7b54\u5668\u914d\u7f6e\u7a97\u53e3", None))
-#if QT_CONFIG(accessibility)
+        balise_config_form.setWindowTitle(
+            QCoreApplication.translate("balise_config_form", u"\u5e94\u7b54\u5668\u914d\u7f6e\u7a97\u53e3", None))
+        # if QT_CONFIG(accessibility)
         balise_config_form.setAccessibleName("")
-#endif // QT_CONFIG(accessibility)
-        self.balise_name_label.setText(QCoreApplication.translate("balise_config_form", u"\u5e94\u7b54\u5668\u914d\u7f6e", None))
+        # endif // QT_CONFIG(accessibility)
+        self.balise_name_label.setText(
+            QCoreApplication.translate("balise_config_form", u"\u5e94\u7b54\u5668\u914d\u7f6e", None))
         self.pushButton_save.setText(QCoreApplication.translate("balise_config_form", u"\u4fdd\u5b58", None))
         self.pushButton_del.setText(QCoreApplication.translate("balise_config_form", u"\u5220\u9664", None))
         self.pushButton_cancel.setText(QCoreApplication.translate("balise_config_form", u"\u53d6\u6d88", None))
-        self.comboBox_balise_type.setItemText(0, QCoreApplication.translate("balise_config_form", u"\u65e0\u6e90", None))
-        self.comboBox_balise_type.setItemText(1, QCoreApplication.translate("balise_config_form", u"\u6709\u6e90", None))
+        self.comboBox_balise_type.setItemText(0,
+                                              QCoreApplication.translate("balise_config_form", u"\u65e0\u6e90", None))
+        self.comboBox_balise_type.setItemText(1,
+                                              QCoreApplication.translate("balise_config_form", u"\u6709\u6e90", None))
 
-        self.label_turnout_2.setText(QCoreApplication.translate("balise_config_form", u"\u7236\u5e94\u7b54\u5668", None))
+        self.label_turnout_2.setText(
+            QCoreApplication.translate("balise_config_form", u"\u7236\u5e94\u7b54\u5668", None))
         self.label_turnout_3.setText(QCoreApplication.translate("balise_config_form", u"\u5b50\u7f16\u53f7", None))
         self.lineEdit_name.setText(QCoreApplication.translate("balise_config_form", u"XXX", None))
         self.label_turnout_4.setText(QCoreApplication.translate("balise_config_form", u"\u7c7b\u578b", None))
         self.label_turnout_5.setText(QCoreApplication.translate("balise_config_form", u"\u4f4d\u7f6e", None))
         self.label_turnout_6.setText(QCoreApplication.translate("balise_config_form", u"\u540d\u79f0", None))
-        self.textEdit_config.setHtml(QCoreApplication.translate("balise_config_form", u"<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
-"<html><head><meta name=\"qrichtext\" content=\"1\" /><meta charset=\"utf-8\" /><style type=\"text/css\">\n"
-"p, li { white-space: pre-wrap; }\n"
-"hr { height: 1px; border-width: 0; }\n"
-"li.unchecked::marker { content: \"\\2610\"; }\n"
-"li.checked::marker { content: \"\\2612\"; }\n"
-"</style></head><body style=\" font-family:'Microsoft YaHei UI'; font-size:10pt; font-weight:400; font-style:normal;\">\n"
-"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p></body></html>", None))
-        self.label_turnout_7.setText(QCoreApplication.translate("balise_config_form", u"\u6dfb\u52a0\u62a5\u6587", None))
+        self.textEdit_config.setHtml(QCoreApplication.translate("balise_config_form",
+                                                                u"<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
+                                                                "<html><head><meta name=\"qrichtext\" content=\"1\" /><meta charset=\"utf-8\" /><style type=\"text/css\">\n"
+                                                                "p, li { white-space: pre-wrap; }\n"
+                                                                "hr { height: 1px; border-width: 0; }\n"
+                                                                "li.unchecked::marker { content: \"\\2610\"; }\n"
+                                                                "li.checked::marker { content: \"\\2612\"; }\n"
+                                                                "</style></head><body style=\" font-family:'Microsoft YaHei UI'; font-size:10pt; font-weight:400; font-style:normal;\">\n"
+                                                                "<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p></body></html>",
+                                                                None))
+        self.label_turnout_7.setText(
+            QCoreApplication.translate("balise_config_form", u"\u6dfb\u52a0\u62a5\u6587", None))
     # retranslateUi
-

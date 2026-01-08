@@ -32,10 +32,10 @@ class ConfigManager:
             self.config_dir = os.path.join(project_root, "data", "config")
         else:
             self.config_dir = config_dir
-            
+
         if not os.path.exists(self.config_dir):
             os.makedirs(self.config_dir)
-        
+
         self.balise_file = os.path.join(self.config_dir, "balises.json")
         self.balise_csv_file = os.path.join(self.config_dir, "balises.csv")
         self.station_file = os.path.join(self.config_dir, "stations.json")
@@ -114,7 +114,7 @@ class ConfigManager:
         # Process groups
         for father_id, group in groups.items():
             count = len(group)
-            
+
             # Sort by explicit sub_id (if numeric) or location to have a consistent order
             # But we must respect existing sub_ids if user set them.
             # Strategy:
@@ -124,7 +124,7 @@ class ConfigManager:
                 sid = str(b.get("sub_id", "")).strip()
                 if sid.isdigit():
                     used_ids.add(int(sid))
-            
+
             # 2. Fill missing sub_ids
             next_id = 0
             for b in group:
@@ -134,11 +134,11 @@ class ConfigManager:
                         next_id += 1
                     b["sub_id"] = str(next_id)
                     used_ids.add(next_id)
-            
+
             # 3. Update n_pig, n_total, q_link for ALL in group
             for b in group:
                 b["n_total"] = str(count)
-                
+
                 # Check sub_id to assume n_pig
                 try:
                     s_id = int(b.get("sub_id", 0))
@@ -169,11 +169,11 @@ class ConfigManager:
                     if len(rows) < 3:
                         # Not enough data (Header + Explanation + Data)
                         return []
-                    
+
                     header = rows[0]
                     # Skip explanation row (rows[1])
                     data_rows = rows[2:]
-                    
+
                     result = []
                     for row in data_rows:
                         item = {}
@@ -182,7 +182,7 @@ class ConfigManager:
                                 key = header[i]
                                 if value.strip():
                                     item[key] = value
-                        
+
                         # Convert types for core fields
                         if "location" in item:
                             try:
@@ -194,16 +194,16 @@ class ConfigManager:
                                 item["type"] = int(item["type"])
                             except ValueError:
                                 item["type"] = 0
-                                
+
                         result.append(item)
-                    
+
                     # Process groups logic
                     self.process_balise_groups(result)
                     return result
             except Exception as e:
                 print(f"Error loading Balise CSV: {e}")
                 return []
-        
+
         return self.load_config(self.balise_file)
 
     def save_balises(self, data):
@@ -226,22 +226,22 @@ class ConfigManager:
 
         # Define standard fields and packet fields
         standard_fields = [
-            "name", "location", "type", "father_balise", "sub_id", 
-            "q_updown", "m_version", "q_media", "n_pig", "n_total", 
+            "name", "location", "type", "father_balise", "sub_id",
+            "q_updown", "m_version", "q_media", "n_pig", "n_total",
             "m_dup", "m_mcount", "nid_c", "nid_bg", "q_link"
         ]
-        
+
         # Packet fields mapping
         # Updated based on Information Packet MD
         packet_fields = [
-            "ETCS-5", "CTCS-1", "ETCS-21", "ETCS-27", "ETCS-41", 
-            "ETCS-42", "ETCS-44", "ETCS-46", "ETCS-68", "ETCS-72", 
+            "ETCS-5", "CTCS-1", "ETCS-21", "ETCS-27", "ETCS-41",
+            "ETCS-42", "ETCS-44", "ETCS-46", "ETCS-68", "ETCS-72",
             "ETCS-79", "ETCS-131", "ETCS-132", "ETCS-137", "ETCS-254",
             "CTCS-2", "CTCS-4", "CTCS-5"
         ]
-        
+
         all_fields = standard_fields + packet_fields
-        
+
         # Explanation row
         explanations = [
             "名称", "位置(km)", "类型(0=无/1=有)", "父应答器名称", "组内编号",
@@ -249,17 +249,17 @@ class ConfigManager:
             "复制关系", "报文计数器", "地区编号", "应答器ID", "链接关系"
         ]
         explanations += ["包信息: " + p for p in packet_fields]
-        
+
         rows = []
         rows.append(all_fields)
         rows.append(explanations)
-        
+
         for item in data:
             row = []
             for field in all_fields:
                 row.append(str(item.get(field, "")))
             rows.append(row)
-            
+
         try:
             with open(self.balise_csv_file, 'w', encoding='utf-8-sig', newline='') as f:
                 writer = csv.writer(f)

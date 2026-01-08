@@ -18,7 +18,7 @@ from ..core.packet_utils import PACKET_TYPE_MAP, PacketUtils, decode_packet
 
 class SimulationWidget(QWidget):
     """Widget for visualizing and simulating train movements and balise interactions."""
-    
+
     trains_updated = Signal(list)
     balise_create_requested = Signal(float)
     balise_edit_requested = Signal(int)
@@ -76,8 +76,8 @@ class SimulationWidget(QWidget):
         self.last_schedule_mtime = None
 
         # Timetable data
-        self.schedule_entries = []    # Parsed schedule definitions
-        self.schedule_runtime = []    # Per-run mutable state
+        self.schedule_entries = []  # Parsed schedule definitions
+        self.schedule_runtime = []  # Per-run mutable state
         self.schedule_loaded = False
         self.train_templates = []
 
@@ -102,7 +102,7 @@ class SimulationWidget(QWidget):
         self.dragged_balise_index = -1
         self.drag_start_mouse_pos = QPoint()
         self.has_dragged = False
-        
+
         # Track last pass time for exit balises to handle signal delay
         # Key: balise_index, Value: timestamp (datetime)
         self.balise_pass_times = {}
@@ -116,13 +116,13 @@ class SimulationWidget(QWidget):
         self.last_tooltip_text = ""
 
     def set_config(
-        self,
-        balises: List[Dict],
-        stations: List[Dict],
-        trains: List[Dict],
-        line_config: Optional[Dict] = None,
-        reset_view: bool = True,
-        preserve_state: bool = False,
+            self,
+            balises: List[Dict],
+            stations: List[Dict],
+            trains: List[Dict],
+            line_config: Optional[Dict] = None,
+            reset_view: bool = True,
+            preserve_state: bool = False,
     ):
         """Load configuration data into the simulation.
 
@@ -136,7 +136,7 @@ class SimulationWidget(QWidget):
         """
         self.balises = copy.deepcopy(balises)
         self.stations = copy.deepcopy(stations)
-        
+
         # If balise list changes length or identity, indices in balise_pass_times are invalid.
         # However, set_config is usually called with preserve_state=False on load.
         # If preserve_state=True (e.g. modifying property), indices might match if list order is same.
@@ -147,7 +147,7 @@ class SimulationWidget(QWidget):
         # Given "preserve_state" is mainly for "don't reset trains", we should ideally be careful.
         # But the original bug was stale times.
         if not preserve_state:
-             self.balise_pass_times.clear()
+            self.balise_pass_times.clear()
 
         # Use a private copy to avoid polluting persisted config with runtime-only trains
         if not preserve_state:
@@ -156,7 +156,7 @@ class SimulationWidget(QWidget):
             # If preserving state, we don't overwrite self.trains with the config list
             # because self.trains currently holds the active/running train objects.
             pass
-            
+
         self.train_templates = copy.deepcopy(trains)
         self.line_config = line_config or {}
 
@@ -170,7 +170,7 @@ class SimulationWidget(QWidget):
                 train["is_jumping"] = False
                 train["jump_h"] = 0.0
                 train["jump_v"] = 0.0
-                train["active_restrictions"] = [] # Type: List[Dict: {type, start_km, end_km, speed, priority}]
+                train["active_restrictions"] = []  # Type: List[Dict: {type, start_km, end_km, speed, priority}]
 
         # Determine track length
         if line_config and "total_length" in line_config:
@@ -182,12 +182,12 @@ class SimulationWidget(QWidget):
                 max_loc = max(max_loc, b.get("location", 0))
             for s in stations:
                 max_loc = max(max_loc, s.get("location", 0))
-            self.track_length = max(max_loc + 10, 20) # At least 20km
+            self.track_length = max(max_loc + 10, 20)  # At least 20km
 
         if not preserve_state:
             self.reset_train_positions()
             self.balise_pass_times.clear()  # Clear pass history on new config
-            
+
         self._process_balise_ids()
 
         if reset_view:
@@ -242,7 +242,7 @@ class SimulationWidget(QWidget):
                         next_id += 1
                     b["sub_id"] = str(next_id)
                     used_ids.add(next_id)
-            
+
             # Assign n_total and q_link
             count = len(group)
             for b in group:
@@ -291,15 +291,15 @@ class SimulationWidget(QWidget):
         """
         if not station_name:
             return None, None
-            
+
         for i, balise in enumerate(self.balises):
             name = balise.get("name", "")
             b_type = str(balise.get("type", "0"))
-            
+
             # Check criteria
             if b_type == "1" and station_name in name and "CZ" in name:
                 return i, balise
-                
+
         return None, None
 
     def _get_effective_balise_packets(self, balise_index, current_time=None):
@@ -314,54 +314,54 @@ class SimulationWidget(QWidget):
         """
         balise = self.balises[balise_index]
         all_packets = copy.deepcopy(balise)
-        
+
         # If no CTCS-5 configured, logic doesn't apply
         if "CTCS-5" not in balise or not str(balise["CTCS-5"]).strip():
             return all_packets
-            
+
         current_dt = current_time or datetime.datetime.now()
-        
+
         # Check if authorized to be Green
         is_green = False
-        
+
         # Check overlap with authorization window
         # We need to find a train that uses this station/balise
         # Optimization: We only check if we have a recorded 'pass' time that is very recent
         # BUT the requirement says "Departure sends other packets".
         # Before passing, the train is AT the station (or approaching).
         # We need to know if a train is *currently authorized* to pass.
-        
+
         # Search for a relevant authorized train
         for train in self.trains:
             # Determine if this is a scheduled train or manual
             is_scheduled = train.get("schedule_managed", False)
-                
+
             # Check station relevance
             s_station = train.get("start_station")
             e_station = train.get("end_station")
-            
+
             # Helper to safely get location
             def get_loc(key, name):
                 val = train.get(key)
                 if val is not None: return float(val)
                 return self._station_location(name)
-            
+
             t_start = get_loc("start_loc", s_station)
             t_end = get_loc("end_loc", e_station)
-            
+
             # Check if this balise belongs to start or end station
-            b_name = balise.get("name","")
+            b_name = balise.get("name", "")
             b_loc = float(balise.get("location", 0.0))
-            
+
             relevant = False
             target_leave_time = None
-            should_stop = False # For manual trains at end station
-            
+            should_stop = False  # For manual trains at end station
+
             if s_station and s_station in b_name and "CZ" in b_name:
                 relevant = True
                 # Start station: authorized to leave
                 if is_scheduled:
-                     target_leave_time = train.get("dep_start") or train.get("dep_time")
+                    target_leave_time = train.get("dep_start") or train.get("dep_time")
             elif e_station and e_station in b_name and "CZ" in b_name:
                 relevant = True
                 # End station:
@@ -375,7 +375,7 @@ class SimulationWidget(QWidget):
                 if t_start is not None and t_end is not None:
                     min_loc = min(t_start, t_end)
                     max_loc = max(t_start, t_end)
-                    
+
                     if min_loc < b_loc < max_loc:
                         relevant = True
                         if is_scheduled:
@@ -391,7 +391,7 @@ class SimulationWidget(QWidget):
                     # Scheduled Logic
                     if current_dt >= target_leave_time:
                         last_pass = self.balise_pass_times.get(balise_index)
-                        
+
                         if not last_pass:
                             is_green = True
                         elif last_pass < target_leave_time:
@@ -405,17 +405,17 @@ class SimulationWidget(QWidget):
                     # Start or Intermediate -> Green authorized immediately
                     # Logic: Green until passed + 3s
                     last_pass = self.balise_pass_times.get(balise_index)
-                    
+
                     if not last_pass:
                         is_green = True
                     else:
                         delta = (current_dt - last_pass).total_seconds()
                         if delta < 3.0:
                             is_green = True
-                            
+
                 if is_green:
-                        break
-                         
+                    break
+
         if is_green:
             # Remove CTCS-5, keep others
             # Also hide any packet that has empty value
@@ -494,7 +494,7 @@ class SimulationWidget(QWidget):
                     # Handle Exit Balise Logic for Start/End Locations
                     # User Request: Train start/stop should be at Station Location, not Balise Location.
                     # Removed balise location override.
-                    
+
                     actual_start_loc = start_loc
                     actual_end_loc = end_loc
 
@@ -635,7 +635,8 @@ class SimulationWidget(QWidget):
             if entry.get("created") or entry.get("removed"):
                 continue
 
-            trigger_time = entry.get("arr_start") or entry.get("dep_start") or entry.get("arr_end") or entry.get("leave_end")
+            trigger_time = entry.get("arr_start") or entry.get("dep_start") or entry.get("arr_end") or entry.get(
+                "leave_end")
             leave_time = entry.get("leave_end") or entry.get("arr_end")
             if leave_time and self.current_sim_time >= leave_time:
                 entry["removed"] = True
@@ -671,17 +672,17 @@ class SimulationWidget(QWidget):
                 continue
             start_station_name = train.get("start_station", "")
             end_station_name = train.get("end_station", "")
-            
+
             start_loc = 0.0
             end_loc = self.track_length  # Default end
-            
+
             if start_station_name and start_station_name != "根据运行图运行":
-                 loc = self._station_location(start_station_name)
-                 if loc is not None: start_loc = loc
+                loc = self._station_location(start_station_name)
+                if loc is not None: start_loc = loc
 
             if end_station_name and end_station_name != "根据运行图运行":
-                 loc = self._station_location(end_station_name)
-                 if loc is not None: end_loc = loc
+                loc = self._station_location(end_station_name)
+                if loc is not None: end_loc = loc
 
             train["current_location"] = start_loc
             train["start_loc"] = start_loc
@@ -849,17 +850,17 @@ class SimulationWidget(QWidget):
                 limit_loc = self.track_length
 
             if train["current_location"] >= limit_loc:
-                action = int(train.get("end_action", 0)) # 0:Stop, 2:Restart
-                
-                if action == 2: # Restart
+                action = int(train.get("end_action", 0))  # 0:Stop, 2:Restart
+
+                if action == 2:  # Restart
                     start_loc = train.get("start_loc", 0.0)
                     train["current_location"] = start_loc
-                    
+
                     # Reset Speed
                     default_max = float(self.line_config.get("max_speed", 350.0))
                     initial_speed = float(train.get("initial_speed", 0.0))
                     new_base = initial_speed if initial_speed > 0 else default_max
-                    
+
                     train["base_speed"] = new_base
                     train["current_speed_limit"] = new_base
                     train["active_restrictions"] = []
@@ -903,10 +904,10 @@ class SimulationWidget(QWidget):
                 # Skip if in jump
                 if train.get("jump_h", 0) > 0:
                     continue
-                
+
                 # Record pass time for Exit Balises logic
                 self.balise_pass_times[i] = self.current_sim_time or datetime.datetime.now()
-                
+
                 self.handle_balise_pass(train, balise, i)
 
     def check_restrictions(self, train):
@@ -916,7 +917,7 @@ class SimulationWidget(QWidget):
         """
         loc = train.get("current_location", 0.0)
         restrs = train.get("active_restrictions", [])
-        
+
         # Filter expired
         valid_restrs = []
         for r in restrs:
@@ -924,19 +925,19 @@ class SimulationWidget(QWidget):
             if r["end_km"] is not None and loc > r["end_km"]:
                 continue
             valid_restrs.append(r)
-        
+
         train["active_restrictions"] = valid_restrs
-        
+
         # Calculate speed
         default_max = float(self.line_config.get("max_speed", 350.0))
         base = train.get("base_speed", default_max)
         limit = base
-        
+
         for r in valid_restrs:
             if loc >= r["start_km"]:
                 if r["speed"] < limit:
                     limit = r["speed"]
-                
+
         train["current_speed_limit"] = limit
 
     def handle_balise_pass(self, train: Dict, balise: Dict, index: int = -1):
@@ -951,7 +952,7 @@ class SimulationWidget(QWidget):
         """
         b_loc = balise.get("location", 0.0)
         log_packets = []
-        
+
         # Determine effective packets based on schedule state
         effective_balise = balise
         if index >= 0:
@@ -960,15 +961,15 @@ class SimulationWidget(QWidget):
         # 1. CTCS-5 (Absolute Stop) - Custom Logic
         # If effective packets contain CTCS-5, it means RED signal.
         if "CTCS-5" in effective_balise:
-             # Just log it, usually implies emergency stop or red signal
-             log_packets.append("CTCS-5 (Absolute Stop)")
-             # We might enforce speed=0 here if strictly simulating ATP
-             train["current_speed_limit"] = 0.0
-             train["base_speed"] = 0.0
-             # Clear other restrictions as this is absolute
-             train["active_restrictions"] = [] 
+            # Just log it, usually implies emergency stop or red signal
+            log_packets.append("CTCS-5 (Absolute Stop)")
+            # We might enforce speed=0 here if strictly simulating ATP
+            train["current_speed_limit"] = 0.0
+            train["base_speed"] = 0.0
+            # Clear other restrictions as this is absolute
+            train["active_restrictions"] = []
 
-        # 1. CTCS-2 (Temporary Speed Restriction)
+            # 1. CTCS-2 (Temporary Speed Restriction)
         # Fields: Q_SCALE, V_TSR, D_TSR, L_TSR
         if "CTCS-2" in effective_balise:
             val = effective_balise["CTCS-2"]
@@ -976,17 +977,17 @@ class SimulationWidget(QWidget):
                 try:
                     data = decode_packet("CTCS-2", val)
                     log_packets.append("CTCS-2")
-                    
+
                     q_scale = data.get("Q_SCALE", 1)
                     scale = PacketUtils.get_q_scale_factor(q_scale)
-                    
+
                     v_tsr = data.get("V_TSR", 0) * 5
                     d_tsr = data.get("D_TSR", 0)
                     l_tsr = data.get("L_TSR", 0)
-                    
+
                     start_km = b_loc + (d_tsr * scale / 1000.0)
                     end_km = start_km + (l_tsr * scale / 1000.0)
-                    
+
                     restr = {
                         "type": "CTCS-2",
                         "start_km": start_km,
@@ -1005,18 +1006,18 @@ class SimulationWidget(QWidget):
                 try:
                     data = decode_packet("ETCS-27", val)
                     log_packets.append("ETCS-27")
-                    
+
                     v_static_code = data.get("V_STATIC", 127)
                     q_scale = data.get("Q_SCALE", 1)
                     scale = PacketUtils.get_q_scale_factor(q_scale)
                     d_static = data.get("D_STATIC", 0)
-                    
+
                     start_km = b_loc + (d_static * scale / 1000.0)
-                    
+
                     if v_static_code == 127:
-                         # End of SSP? For now reset base speed to max
-                         default_max = float(self.line_config.get("max_speed", 350.0))
-                         train["base_speed"] = default_max
+                        # End of SSP? For now reset base speed to max
+                        default_max = float(self.line_config.get("max_speed", 350.0))
+                        train["base_speed"] = default_max
                     else:
                         speed_val = float(v_static_code * 5)
                         # ETCS-27 updates the Base Speed Profile
@@ -1044,10 +1045,10 @@ class SimulationWidget(QWidget):
                             # User Requirement: "Limit speed exceeds valid distance... end speed limit" (CTCS-2 context).
                             # So for ETCS-27: Just set base speed.
                             train["base_speed"] = speed_val
-                            
+
                 except Exception:
                     pass
-        
+
         # Log event
         train_name = train.get("name", "Unknown Train")
         if log_packets:
@@ -1059,7 +1060,8 @@ class SimulationWidget(QWidget):
                     limit = float(effective_balise.get("speed_limit"))
                     train["base_speed"] = limit
                     self.logger.log(f"Train {train_name} manual speed set to {limit}")
-                except: pass
+                except:
+                    pass
 
     def zoom_in(self):
         """放大视图。关闭自动适应。"""
@@ -1118,10 +1120,10 @@ class SimulationWidget(QWidget):
             for train in self.trains:
                 name = train.get("name", "")
                 if (
-                    "JUMP" in name or "Jump" in name or "jump" in name
+                        "JUMP" in name or "Jump" in name or "jump" in name
                 ) and not train.get("is_jumping", False):
                     train["is_jumping"] = True
-                    train["jump_v"] = 25.0 # Initial jump velocity
+                    train["jump_v"] = 25.0  # Initial jump velocity
             # If simulation is paused, we need to manually trigger update to show jump frame-by-frame?
             # Or assume it only works when running.
             # Usually jump physics is in update_simulation which runs on timer.
@@ -1175,14 +1177,14 @@ class SimulationWidget(QWidget):
                 by = self.offset_y
 
                 # Hit detection (Triangle area)
-                if abs(click_pos.x() - bx) <= triangle_w/2 and \
-                   0 <= (click_pos.y() - by) <= triangle_h:
+                if abs(click_pos.x() - bx) <= triangle_w / 2 and \
+                        0 <= (click_pos.y() - by) <= triangle_h:
                     self.is_dragging_balise = True
                     self.dragged_balise_index = i
                     self.drag_start_mouse_pos = click_pos
                     self.has_dragged = False
                     self.setCursor(Qt.SizeHorCursor)
-                    return # Consumed
+                    return  # Consumed
 
         if event.button() == Qt.RightButton:
             self.is_panning = True
@@ -1214,7 +1216,7 @@ class SimulationWidget(QWidget):
                 # Update balise
                 self.balises[self.dragged_balise_index]["location"] = float(f"{new_loc:.4f}")
 
-                self.update() # Repaint
+                self.update()  # Repaint
             return
 
         if self.is_panning:
@@ -1227,9 +1229,9 @@ class SimulationWidget(QWidget):
 
         # Tooltip logic
         mouse_pos = event.pos()
-        min_dist = 20 # pixels
+        min_dist = 20  # pixels
         hovered_balise = None
-        
+
         # Reset hover state locally (will settle after loop)
         self.hovered_balise_index = -1
         self.cursor_global_pos = None
@@ -1239,7 +1241,7 @@ class SimulationWidget(QWidget):
             bx = loc * self.scale + self.offset_x
             by = self.offset_y
 
-            dist = ((mouse_pos.x() - bx)**2 + (mouse_pos.y() - by)**2)**0.5
+            dist = ((mouse_pos.x() - bx) ** 2 + (mouse_pos.y() - by) ** 2) ** 0.5
             if dist < min_dist:
                 hovered_balise = balise
                 self.hovered_balise_index = i
@@ -1250,7 +1252,7 @@ class SimulationWidget(QWidget):
             # Use effective packets for display to show current state (Red/Green)
             effective = self._get_effective_balise_packets(self.hovered_balise_index, self.current_sim_time)
             info = self.get_balise_tooltip_text(effective)
-            
+
             # Force update on move to keep it following cursor
             QToolTip.showText(self.cursor_global_pos, info, self)
             self.last_tooltip_text = info
@@ -1259,8 +1261,6 @@ class SimulationWidget(QWidget):
             self.last_tooltip_text = ""
 
         super().mouseMoveEvent(event)
-
-
 
     def get_balise_tooltip_text(self, balise):
         """
@@ -1299,7 +1299,7 @@ class SimulationWidget(QWidget):
         # Translate binary N_PIG to int for display
         try:
             pig_int = int(str(n_pig), 2)
-            pig_desc = f"{n_pig}({pig_int+1})"
+            pig_desc = f"{n_pig}({pig_int + 1})"
         except ValueError:
             pig_desc = str(n_pig)
 
@@ -1346,7 +1346,8 @@ class SimulationWidget(QWidget):
                             q_dir_desc = PacketUtils.get_q_dir_desc(PacketUtils.int_to_bin(decoded_data["Q_DIR"], 2))
                             items_str.append(f"Dir:{q_dir_desc}")
                         if "Q_SCALE" in decoded_data:
-                            q_scale_desc = PacketUtils.get_q_scale_desc(PacketUtils.int_to_bin(decoded_data["Q_SCALE"], 2))
+                            q_scale_desc = PacketUtils.get_q_scale_desc(
+                                PacketUtils.int_to_bin(decoded_data["Q_SCALE"], 2))
                             items_str.append(f"Scale:{q_scale_desc}")
 
                         for k, v in decoded_data.items():
@@ -1354,7 +1355,7 @@ class SimulationWidget(QWidget):
                                 items_str.append(f"{k}:{v}")
                         decoded_str = " ".join(items_str)
                     except Exception as e:
-                        pass # Fallback to raw value
+                        pass  # Fallback to raw value
 
                 packets_found.append(f"<b>[{key}] {desc}</b>: {decoded_str}")
 
@@ -1404,7 +1405,7 @@ class SimulationWidget(QWidget):
         """
         if event.button() == Qt.LeftButton:
             # Check if click is near the track Y position
-            if abs(event.pos().y() - self.offset_y) < 30: # 30 pixels tolerance
+            if abs(event.pos().y() - self.offset_y) < 30:  # 30 pixels tolerance
                 # Calculate location
                 click_x = event.pos().x()
                 location = (click_x - self.offset_x) / self.scale
@@ -1431,7 +1432,7 @@ class SimulationWidget(QWidget):
 
         # Auto fit logic
         if self.auto_fit:
-            width = self.width() - 100 # Margin
+            width = self.width() - 100  # Margin
             if self.track_length > 0:
                 self.scale = width / self.track_length
             self.offset_x = 50
@@ -1462,7 +1463,7 @@ class SimulationWidget(QWidget):
             painter.drawText(int(x - 20), int(y + 45), name)
 
         # Draw Balises
-        balise_groups = {} # key -> list of (x_pos, balise_obj)
+        balise_groups = {}  # key -> list of (x_pos, balise_obj)
 
         for balise in self.balises:
             loc = balise.get("location", 0)
@@ -1473,7 +1474,7 @@ class SimulationWidget(QWidget):
 
             x = self.offset_x + loc * self.scale
             y = self.offset_y
-            
+
             # Grouping Logic
             father = str(balise.get("father_balise", "")).strip()
             name = str(balise.get("name", "")).strip()
@@ -1483,8 +1484,8 @@ class SimulationWidget(QWidget):
             # B has father="A", key="A".
             # Both go to "A".
             key = father if father else name
-            if not key: key = "Unknown" 
-            
+            if not key: key = "Unknown"
+
             if key not in balise_groups:
                 balise_groups[key] = []
             balise_groups[key].append((x, balise))
@@ -1492,12 +1493,12 @@ class SimulationWidget(QWidget):
             # Draw Triangle
             triangle_h = 18
             triangle_w = 24
-            top_y = y # Start directly from track line
+            top_y = y  # Start directly from track line
 
             points = [
-                QPointF(x, top_y),                             # Top vertex
-                QPointF(x - triangle_w/2, top_y + triangle_h), # Bottom Left
-                QPointF(x + triangle_w/2, top_y + triangle_h)  # Bottom Right
+                QPointF(x, top_y),  # Top vertex
+                QPointF(x - triangle_w / 2, top_y + triangle_h),  # Bottom Left
+                QPointF(x + triangle_w / 2, top_y + triangle_h)  # Bottom Right
             ]
 
             if b_type == 1:
@@ -1522,27 +1523,27 @@ class SimulationWidget(QWidget):
 
         for key, items in balise_groups.items():
             if not items: continue
-            
+
             # Calculate visual center of the group
             xs = [item[0] for item in items]
             min_x = min(xs)
             max_x = max(xs)
             center_x = (min_x + max_x) / 2
-            
+
             # Determine text
             if len(items) > 1:
                 label = key
             else:
                 # Single balise, use its own name
                 label = items[0][1].get("name", "")
-            
+
             if not label: continue
 
             text_w = fm.horizontalAdvance(label)
             # Y position: Track Y + Triangle Height + Margin
-            text_y = self.offset_y + 18 + 12 
-            
-            painter.drawText(int(center_x - text_w/2), int(text_y), label)
+            text_y = self.offset_y + 18 + 12
+
+            painter.drawText(int(center_x - text_w / 2), int(text_y), label)
 
         # Draw Trains
         for train in self.trains:
@@ -1557,7 +1558,7 @@ class SimulationWidget(QWidget):
                 scale_factor = 0.06
                 w = self.train_img.width() * scale_factor
                 h = self.train_img.height() * scale_factor
-                painter.drawPixmap(QRect(int(x - w/2), int(y - h - 5), int(w), int(h)), self.train_img)
+                painter.drawPixmap(QRect(int(x - w / 2), int(y - h - 5), int(w), int(h)), self.train_img)
             else:
                 painter.setBrush(Qt.red)
                 painter.drawRect(x - 10, y - 20, 20, 10)

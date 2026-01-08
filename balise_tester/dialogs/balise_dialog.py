@@ -1,5 +1,7 @@
-from PySide6.QtWidgets import QDialog, QMessageBox
 import json
+
+from PySide6.QtWidgets import QDialog, QMessageBox
+
 from ui.balise_config import Ui_balise_config_form
 from ..core.packet_utils import (
     encode_packet,
@@ -34,7 +36,7 @@ class BaliseConfigDialog(QDialog, Ui_balise_config_form):
         for pkt_name in PACKET_DEFS.keys():
             desc = PACKET_TYPE_MAP.get(pkt_name, pkt_name)
             self.comboBox_balise_add_config.addItem(f"{pkt_name} - {desc}", pkt_name)
-        
+
         # Connect signal
         self.comboBox_balise_add_config.currentIndexChanged.connect(self.add_packet_template)
 
@@ -44,14 +46,14 @@ class BaliseConfigDialog(QDialog, Ui_balise_config_form):
         """
         if index <= 0:
             return
-            
+
         pkt_name = self.comboBox_balise_add_config.currentData()
         if not pkt_name or pkt_name not in PACKET_DEFS:
             return
-            
+
         # Reset selection
         self.comboBox_balise_add_config.setCurrentIndex(0)
-        
+
         # Determine existing data
         try:
             current_text = self.textEdit_config.toPlainText()
@@ -59,15 +61,15 @@ class BaliseConfigDialog(QDialog, Ui_balise_config_form):
         except json.JSONDecodeError:
             QMessageBox.warning(self, "警告", "当前配置内容格式错误，无法追加新包。请先修正JSON格式。")
             return
-            
+
         if pkt_name in current_data:
             QMessageBox.information(self, "提示", f"信息包 {pkt_name} 已存在。")
             return
-            
+
         # Generate Template
         defs = PACKET_DEFS[pkt_name]
         template = {}
-        
+
         # Create a temporary dict with variable names first
         var_data = {}
         for field in defs:
@@ -80,15 +82,15 @@ class BaliseConfigDialog(QDialog, Ui_balise_config_form):
                 # If conditional, we might skip or include default.
                 # Including default is safer for template to show user what's available.
                 pass
-                
+
             var_data[field["name"]] = val
-            
+
         # Translate to Chinese
         cn_data = translate_to_cn(var_data, pkt_name)
-        
+
         # Add to current data
         current_data[pkt_name] = cn_data
-        
+
         # Update Text Edit
         self.textEdit_config.setText(json.dumps(current_data, indent=4, ensure_ascii=False))
 
@@ -258,13 +260,13 @@ class BaliseConfigDialog(QDialog, Ui_balise_config_form):
 
         # 2. Update M_MCOUNT based on Type if not manually set to something else reasonable
         current_mcount = str(new_data.get("m_mcount", ""))
-        current_type = new_data["type"] # 0=Passive/无源, 1=Active/有源
+        current_type = new_data["type"]  # 0=Passive/无源, 1=Active/有源
 
         # Requirement: Passive=255, Active=252
         if current_type == 0:
             new_data["m_mcount"] = "255"
         elif current_type == 1:
-             new_data["m_mcount"] = "252"
+            new_data["m_mcount"] = "252"
 
         # 3. Update ETCS-79 to match Location if present
         # ETCS-79 is a binary packet now. So simple update is harder unless we decode-update-encode.

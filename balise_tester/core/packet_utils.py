@@ -1,8 +1,8 @@
-
 class PacketUtils:
     """
     处理基本报文数据转换和描述的工具类。
     """
+
     @staticmethod
     def int_to_bin(value, bits):
         """
@@ -52,7 +52,7 @@ class PacketUtils:
         if isinstance(code, int):
             code = f"{code:02b}"
         return maps.get(code, "Unknown")
-        
+
     @staticmethod
     def get_q_scale_factor(code):
         """
@@ -69,25 +69,25 @@ class PacketUtils:
             # If input was binary string '00', int('00') is 0. 
             # If input was binary string '10', int('10') is 10 (decimal ten)!
             # Wait, binary string needs base 2.
-            
+
             if isinstance(code, str):
                 # Try to parse as int first (maybe it's "1" or "2")
                 # If it's "00", int("00") -> 0.
                 # If it's "10", int("10") -> 10. This is ambiguous.
                 # But typically code passed is the VALUE of Q_SCALE (0, 1, 2).
                 # decode_packet returns value (int).
-                
+
                 # If we assume code is value:
                 pass
-            
+
             # Let's rely on standard handling:
             # 0 -> 10cm
             # 1 -> 1m
             # 2 -> 10m
-            
+
             # If a binary string is passed in future, we should handle it.
             # But currently decode_packet returns INT.
-            
+
             if val == 0: return 0.1
             if val == 1: return 1.0
             if val == 2: return 10.0
@@ -108,6 +108,7 @@ class PacketUtils:
         """
         maps = {"00": "反向", "01": "正向", "10": "双向", "11": "备用"}
         return maps.get(code, "Unknown")
+
 
 PACKET_TYPE_MAP = {
     "ETCS-5": "链接信息",
@@ -253,6 +254,7 @@ PACKET_DEFS = {
     ]
 }
 
+
 def translate_to_cn(data, packet_name=None):
     """
     将变量名（Variable Names）字典键转换为中文描述。
@@ -266,7 +268,7 @@ def translate_to_cn(data, packet_name=None):
     """
     new_data = {}
     pkt_defs = PACKET_DEFS.get(packet_name) if packet_name else []
-    
+
     def get_cn_name(var_name):
         if pkt_defs:
             for f in pkt_defs:
@@ -278,6 +280,7 @@ def translate_to_cn(data, packet_name=None):
         cn_k = get_cn_name(k)
         new_data[cn_k] = v
     return new_data
+
 
 def translate_to_var(data, packet_name=None):
     """
@@ -297,13 +300,14 @@ def translate_to_var(data, packet_name=None):
         for f in PACKET_DEFS[packet_name]:
             if "desc" in f:
                 cn_to_pkt[f["desc"]] = f["name"]
-    
+
     for k, v in data.items():
         var_k = cn_to_pkt.get(k)
         if not var_k:
             var_k = cn_to_header.get(k, k)
         new_data[var_k] = v
     return new_data
+
 
 def encode_packet_field(value, length):
     """
@@ -317,6 +321,7 @@ def encode_packet_field(value, length):
         str: 二进制字符串。
     """
     return PacketUtils.int_to_bin(value, length)
+
 
 def encode_packet(packet_name, data):
     """
@@ -332,36 +337,37 @@ def encode_packet(packet_name, data):
     defs = PACKET_DEFS.get(packet_name)
     if not defs:
         return ""
-    
+
     bin_str = ""
     # Process fields
     # Note: condition checking requires current data state. 
     # For encoding, we assume input 'data' has necessary keys or we use defaults/zeros.
-    
+
     # We need to construct the logic carefully.
-    
+
     # Simplified encoder for known fields
     processed_data = data.copy()
-    
+
     for field in defs:
         name = field["name"]
         length = field["len"]
-        
+
         # Check condition
         if "cond" in field:
             if not field["cond"](processed_data):
                 continue
-        
+
         # Get value
         val = 0
         if "val" in field:
             val = field["val"]
         else:
             val = processed_data.get(name, 0)
-            
+
         bin_str += PacketUtils.int_to_bin(val, length)
-        
+
     return bin_str
+
 
 def decode_packet(packet_name, bin_str):
     """
@@ -378,26 +384,26 @@ def decode_packet(packet_name, bin_str):
     defs = PACKET_DEFS.get(packet_name)
     if not defs:
         return {"raw": bin_str}
-    
+
     result = {}
     ptr = 0
     total_len = len(bin_str)
-    
+
     for field in defs:
         name = field["name"]
         length = field["len"]
-        
+
         # Check condition based on ALREADY PARSED fields
         if "cond" in field:
             if not field["cond"](result):
                 continue
-        
+
         if ptr + length > total_len:
             break
-            
-        chunk = bin_str[ptr:ptr+length]
+
+        chunk = bin_str[ptr:ptr + length]
         val = PacketUtils.bin_to_int(chunk)
         result[name] = val
         ptr += length
-        
+
     return result

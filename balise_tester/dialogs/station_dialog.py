@@ -1,5 +1,7 @@
 from PySide6.QtWidgets import QDialog, QMessageBox
+
 from ui.station_config import Ui_train_config_form as Ui_StationConfigForm
+
 
 class StationConfigDialog(QDialog, Ui_StationConfigForm):
     """
@@ -7,6 +9,7 @@ class StationConfigDialog(QDialog, Ui_StationConfigForm):
     
     用于创建或编辑车站的配置信息，如名称和位置。
     """
+
     def __init__(self, parent=None, config_data=None, max_length=None):
         """
         初始化车站配置对话框。
@@ -44,6 +47,6 @@ class StationConfigDialog(QDialog, Ui_StationConfigForm):
             self.config_data["location"] = location
         except ValueError:
             self.config_data["location"] = 0.0
-            
+
         self.config_data["name"] = self.lineEdit_name.text()
         self.accept()
