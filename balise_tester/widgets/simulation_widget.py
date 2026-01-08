@@ -1114,7 +1114,7 @@ class SimulationWidget(QWidget):
 
     def keyPressEvent(self, event):
         """
-        键盘事件处理。用于触发彩蛋（跳跃）。
+        键盘事件处理。用于触发???（跳跃）。
         """
         if event.key() == Qt.Key_Up:
             for train in self.trains:
