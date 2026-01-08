@@ -7,6 +7,17 @@
 			"command": "python d:\\Projects\\Python\\Balise_Tester\\update_map_csv.py",
 			"isBackground": false,
 			"group": "build"
+        },
+      {
+        "label": "Build Balise Tester",
+        "type": "shell",
+        "command": "python",
+        "args": [
+          "d:\\Projects\\Python\\Balise_Tester\\build.py"
+        ],
+        "isBackground": false,
+        "problemMatcher": [],
+        "group": "build"
 		}
 	]
 }

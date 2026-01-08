@@ -274,3 +274,5 @@
 [2026-01-08 10:52:53.678991] Train 'G1260' passed Balise '松江站-CZ0' (Region:0-0, GroupPos:0). Packets: [ETCS-5, CTCS-1, ETCS-27]
 [2026-01-08 10:52:53.951185] Train 'G1260' passed Balise '松江站-FJZ0' (Region:0-0, GroupPos:0). Packets: [ETCS-5, CTCS-1, ETCS-79, CTCS-2]
 [2026-01-08 10:52:54.031172] Train 'G1260' passed Balise '松江站-FJZ1' (Region:0-0, GroupPos:1). Packets: [ETCS-5, CTCS-1, ETCS-21, ETCS-27, ETCS-79]
+[2026-01-08 12:50:43.293369] Train 'G1437' passed Balise '松江站-JZ1' (Region:0-0, GroupPos:1). Packets: [ETCS-5, CTCS-1, ETCS-21, ETCS-27, ETCS-79]
+[2026-01-08 12:50:43.518139] Train 'G1437' passed Balise '松江站-JZ0' (Region:0-0, GroupPos:0). Packets: [ETCS-5, CTCS-1, ETCS-79, CTCS-2]
