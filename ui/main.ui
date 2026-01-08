@@ -25,6 +25,9 @@
   <property name="windowTitle">
    <string>应答器车底传输仿真</string>
   </property>
+  <property name="windowIcon">
+   <iconset theme="QIcon::ThemeIcon::Computer"/>
+  </property>
   <widget class="QWidget" name="centralwidget">
    <property name="font">
     <font>

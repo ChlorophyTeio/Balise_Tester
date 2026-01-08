@@ -10,10 +10,9 @@
 
 from PySide6.QtCore import (QCoreApplication, QMetaObject, QRect,
                             QSize, Qt)
-from PySide6.QtGui import (QAction, QFont)
+from PySide6.QtGui import (QAction, QFont, QIcon)
 from PySide6.QtWidgets import (QLabel, QMenu,
                                QMenuBar, QStatusBar, QWidget)
-
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -22,6 +21,8 @@ class Ui_MainWindow(object):
         MainWindow.resize(1280, 720)
         MainWindow.setMinimumSize(QSize(1280, 720))
         MainWindow.setMaximumSize(QSize(1280, 720))
+        icon = QIcon(QIcon.fromTheme(QIcon.ThemeIcon.Computer))
+        MainWindow.setWindowIcon(icon)
         self.action_balise_create = QAction(MainWindow)
         self.action_balise_create.setObjectName(u"action_balise_create")
         self.action_log_save = QAction(MainWindow)
@@ -205,7 +206,6 @@ class Ui_MainWindow(object):
         self.retranslateUi(MainWindow)
 
         QMetaObject.connectSlotsByName(MainWindow)
-
     # setupUi
 
     def retranslateUi(self, MainWindow):
@@ -264,3 +264,4 @@ class Ui_MainWindow(object):
         self.menustation0.setTitle(QCoreApplication.translate("MainWindow", u"\u4e0a\u6d77\u5357", None))
         self.menustation1.setTitle(QCoreApplication.translate("MainWindow", u"\u4e0a\u6d77\u7ad9", None))
     # retranslateUi
+
