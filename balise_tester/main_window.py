@@ -92,7 +92,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # Initial update of train info
         self.update_train_info(self.trains)
-        
+
         # Instance for About Window
         self.about_window = None
 
@@ -508,15 +508,15 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # Close Map Scheduler if open
         if hasattr(self, 'map_window') and self.map_window:
             self.map_window.close()
-            
+
         # Close Map Preview if open
         if hasattr(self, 'map_preview') and self.map_preview:
             self.map_preview.close()
-            
+
         # Close About Window if open
         if self.about_window:
             self.about_window.close()
-            
+
         # Accept the close event
         event.accept()
 
